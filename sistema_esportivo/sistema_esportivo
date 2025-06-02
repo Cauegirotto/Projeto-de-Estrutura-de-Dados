@@ -1,10 +1,7 @@
-#Cauê Rocha RA:1988978
-#Pedro Guedes RA:2014778
 import collections
 
 class Jogador:
     def __init__(self, nome, idade, posicao):
-#usamos a tupla para guardar os dados imutáveis do jogador.
         self.info = (nome, idade, posicao)
 
     @property
@@ -26,8 +23,7 @@ class Time:
     def __init__(self, nome):
         self.nome = nome
         self.jogadores = [] 
-#lista de jogadores 
-
+ 
     def adicionar_jogador(self, jogador):
         self.jogadores.append(jogador)
 
@@ -40,7 +36,6 @@ class Time:
     def remover_jogador(self):
         if self.jogadores:
             return self.jogadores.pop() 
-#pilha que remove o jogador do topo
         else:
             return None
 
@@ -51,8 +46,8 @@ class Time:
 class Campeonato:
     def __init__(self, nome):
         self.nome = nome
-        self.times = {}#dicionário-nome time
-        self.fila_confrontos = collections.deque()#fila de confrontos com deque
+        self.times = {}
+        self.fila_confrontos = collections.deque()
 
     def adicionar_time(self, time):
         self.times[time.nome] = time
@@ -71,14 +66,13 @@ class Campeonato:
         if self.fila_confrontos:
             confronto = self.fila_confrontos.popleft()
             print(f"Realizando confronto: {confronto[0]} VS {confronto[1]}")
-#confrontos só mostram os times
         else:
             print("Nenhum confronto agendado.")
 
 
 class SistemaCampeonato:
     def __init__(self):
-        self.jogadores_cadastrados = {}#dicionário-evitar de duplicar os jogadore
+        self.jogadores_cadastrados = {}
         self.campeonatos = {}
 
     def cadastrar_jogador(self):
@@ -117,7 +111,7 @@ class SistemaCampeonato:
             return
         time = Time(nome_time)
 
-#adicionar jogadores ao time
+
         while True:
             nome_jogador = input("Adicionar jogador ao time (digite vazio para finalizar): ").strip()
             if nome_jogador == "":

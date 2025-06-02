@@ -1,246 +1,123 @@
-# Projeto-de-Estrutura-de-Dados
-#Cauê Rocha RA:1988978
-#Pedro Guedes RA:2014778
-```python
-import collections
 
-class Jogador:
-    def __init__(self, nome, idade, posicao):
-#usamos a tupla para guardar os dados imutáveis do jogador.
-        self.info = (nome, idade, posicao)
+# 📄 Documentação do Sistema de Gestão de Campeonato Esportivo
 
-    @property
-    def nome(self):
-        return self.info[0]
+## 📌 Visão Geral
 
-    @property
-    def idade(self):
-        return self.info[1]
+Este sistema permite gerenciar **jogadores**, **times** e **campeonatos esportivos**. As funcionalidades incluem:
+- Cadastro de jogadores
+- Criação de campeonatos
+- Adição de times aos campeonatos
+- Associação de jogadores a times
+- Agendamento e realização de confrontos
+- Listagem de dados
+- Remoção de jogadores de times
 
-    @property
-    def posicao(self):
-        return self.info[2]
+---
 
-    def __str__(self):
-        return f"{self.nome}, {self.idade} anos, {self.posicao}"
+## 📦 Estrutura de Classes
 
-class Time:
-    def __init__(self, nome):
-        self.nome = nome
-        self.jogadores = [] 
-#lista de jogadores 
+### 1. `class Jogador`
 
-    def adicionar_jogador(self, jogador):
-        self.jogadores.append(jogador)
+Representa um jogador com atributos imutáveis: **nome**, **idade** e **posição**.
 
-    def remover_jogador_por_nome(self, nome_jogador):
-        for i, jogador in enumerate(self.jogadores):
-            if jogador.nome == nome_jogador:
-                return self.jogadores.pop(i)
-        return None
+#### Atributos:
+- `self.info`: tupla com (nome, idade, posição)
 
-    def remover_jogador(self):
-        if self.jogadores:
-            return self.jogadores.pop() 
-#pilha que remove o jogador do topo
-        else:
-            return None
+#### Propriedades:
+- `nome`: retorna `self.info[0]`
+- `idade`: retorna `self.info[1]`
+- `posicao`: retorna `self.info[2]`
 
-    def listar_jogadores(self):
-        return [str(jogador) for jogador in self.jogadores]
+#### Métodos:
+- `__str__`: retorna uma representação amigável do jogador
 
+---
 
-class Campeonato:
-    def __init__(self, nome):
-        self.nome = nome
-        self.times = {}#dicionário-nome time
-        self.fila_confrontos = collections.deque()#fila de confrontos com deque
+### 2. `class Time`
 
-    def adicionar_time(self, time):
-        self.times[time.nome] = time
+Representa um time contendo jogadores.
 
-    def listar_times(self):
-        return list(self.times.keys())
+#### Atributos:
+- `nome`: nome do time
+- `jogadores`: lista de objetos `Jogador`
 
-    def agendar_confronto(self, nome_time1, nome_time2):
-        if nome_time1 in self.times and nome_time2 in self.times:
-            self.fila_confrontos.append((nome_time1, nome_time2))
-            print(f"Confronto agendado: {nome_time1} vs {nome_time2}")
-        else:
-            print("Um dos times não está cadastrado no campeonato.")
+#### Métodos:
+- `adicionar_jogador(jogador)`: adiciona jogador ao time
+- `remover_jogador_por_nome(nome_jogador)`: remove jogador pelo nome
+- `remover_jogador()`: remove o último jogador da lista (estilo pilha)
+- `listar_jogadores()`: retorna lista de strings representando os jogadores
 
-    def realizar_proximo_confronto(self):
-        if self.fila_confrontos:
-            confronto = self.fila_confrontos.popleft()
-            print(f"Realizando confronto: {confronto[0]} VS {confronto[1]}")
-#confrontos só mostram os times
-        else:
-            print("Nenhum confronto agendado.")
+---
 
+### 3. `class Campeonato`
 
-class SistemaCampeonato:
-    def __init__(self):
-        self.jogadores_cadastrados = {}#dicionário-evitar de duplicar os jogadore
-        self.campeonatos = {}
+Representa um campeonato com seus times e confrontos agendados.
 
-    def cadastrar_jogador(self):
-        nome = input("Nome do jogador: ").strip()
-        if nome in self.jogadores_cadastrados:
-            print("Jogador já cadastrado.")
-            return
-        try:
-            idade = int(input("Idade do jogador: "))
-        except ValueError:
-            print("Idade inválida. Operação cancelada.")
-            return
-        posicao = input("Posição do jogador: ").strip()
-        jogador = Jogador(nome, idade, posicao)
-        self.jogadores_cadastrados[nome] = jogador
-        print(f"Jogador {nome} cadastrado com sucesso.")
+#### Atributos:
+- `nome`: nome do campeonato
+- `times`: dicionário `{nome_time: objeto_time}`
+- `fila_confrontos`: fila de confrontos usando `collections.deque`
 
-    def criar_campeonato(self):
-        nome = input("Nome do campeonato: ").strip()
-        if nome in self.campeonatos:
-            print("Campeonato já existe.")
-            return
-        campeonato = Campeonato(nome)
-        self.campeonatos[nome] = campeonato
-        print(f"Campeonato {nome} criado com sucesso.")
+#### Métodos:
+- `adicionar_time(time)`: adiciona um time ao campeonato
+- `listar_times()`: retorna nomes dos times cadastrados
+- `agendar_confronto(nome_time1, nome_time2)`: insere confronto na fila
+- `realizar_proximo_confronto()`: remove e mostra o próximo confronto da fila
 
-    def adicionar_time_campeonato(self):
-        nome_campeonato = input("Nome do campeonato: ").strip()
-        if nome_campeonato not in self.campeonatos:
-            print("Campeonato não encontrado.")
-            return
-        nome_time = input("Nome do time: ").strip()
-        campeonato = self.campeonatos[nome_campeonato]
-        if nome_time in campeonato.times:
-            print("Time já cadastrado neste campeonato.")
-            return
-        time = Time(nome_time)
+---
 
-#adicionar jogadores ao time
-        while True:
-            nome_jogador = input("Adicionar jogador ao time (digite vazio para finalizar): ").strip()
-            if nome_jogador == "":
-                break
-            if nome_jogador in self.jogadores_cadastrados:
-                time.adicionar_jogador(self.jogadores_cadastrados[nome_jogador])
-                print(f"Jogador {nome_jogador} adicionado ao time {nome_time}.")
-            else:
-                print("Jogador não cadastrado.")
+### 4. `class SistemaCampeonato`
 
-        campeonato.adicionar_time(time)
-        print(f"Time {nome_time} adicionado ao campeonato {nome_campeonato}.")
+Classe principal que gerencia toda a interação do usuário com o sistema.
 
-    def listar_jogadores_time(self):
-        nome_campeonato = input("Nome do campeonato: ").strip()
-        if nome_campeonato not in self.campeonatos:
-            print("Campeonato não encontrado.")
-            return
-        nome_time = input("Nome do time: ").strip()
-        campeonato = self.campeonatos[nome_campeonato]
-        if nome_time not in campeonato.times:
-            print("Time não cadastrado neste campeonato.")
-            return
-        jogadores = campeonato.times[nome_time].listar_jogadores()
-        if jogadores:
-            print(f"Jogadores do time {nome_time}:")
-            for jogador in jogadores:
-                print(" - " + jogador)
-        else:
-            print("Time não possui jogadores.")
+#### Atributos:
+- `jogadores_cadastrados`: dicionário `{nome: objeto_jogador}`
+- `campeonatos`: dicionário `{nome_campeonato: objeto_campeonato}`
 
-    def agendar_confronto(self):
-        nome_campeonato = input("Nome do campeonato: ").strip()
-        if nome_campeonato not in self.campeonatos:
-            print("Campeonato não encontrado.")
-            return
-        nome_time1 = input("Nome do time 1: ").strip()
-        nome_time2 = input("Nome do time 2: ").strip()
-        campeonato = self.campeonatos[nome_campeonato]
-        campeonato.agendar_confronto(nome_time1, nome_time2)
+#### Métodos:
+- `cadastrar_jogador()`: solicita dados do usuário e cadastra um novo jogador
+- `criar_campeonato()`: cria um novo campeonato
+- `adicionar_time_campeonato()`: cria e adiciona um time a um campeonato existente, incluindo a escolha de jogadores
+- `listar_jogadores_time()`: exibe os jogadores de um time em um campeonato
+- `agendar_confronto()`: agenda confronto entre dois times
+- `realizar_confronto()`: realiza (remove e mostra) o próximo confronto
+- `listar_campeonatos()`: mostra todos os campeonatos criados
+- `remover_jogador_time()`: remove um jogador específico de um time
+- `menu()`: exibe o menu principal e permite navegar pelo sistema via console
 
-    def realizar_confronto(self):
-        nome_campeonato = input("Nome do campeonato: ").strip()
-        if nome_campeonato not in self.campeonatos:
-            print("Campeonato não encontrado.")
-            return
-        campeonato = self.campeonatos[nome_campeonato]
-        campeonato.realizar_proximo_confronto()
+---
 
-    def listar_campeonatos(self):
-        if not self.campeonatos:
-            print("Nenhum campeonato cadastrado.")
-            return
-        print("Campeonatos cadastrados:")
-        for nome in self.campeonatos:
-            print(" - " + nome)
+## 🎮 Lógica de Execução
 
-    def remover_jogador_time(self):
-        nome_campeonato = input("Nome do campeonato: ").strip()
-        if nome_campeonato not in self.campeonatos:
-            print("Campeonato não encontrado.")
-            return
-        campeonato = self.campeonatos[nome_campeonato]
+O sistema roda a partir do `if __name__ == "__main__"` e executa `sistema.menu()`, que oferece um menu interativo com as seguintes opções:
 
-        nome_time = input("Nome do time: ").strip()
-        if nome_time not in campeonato.times:
-            print("Time não cadastrado neste campeonato.")
-            return
-        time = campeonato.times[nome_time]
+```
+1. Cadastrar jogador
+2. Criar campeonato
+3. Adicionar time ao campeonato
+4. Listar jogadores de um time
+5. Agendar confronto
+6. Realizar próximo confronto
+7. Listar campeonatos
+8. Remover jogador de um time
+0. Sair
+```
 
-        if not time.jogadores:
-            print("Este time não possui jogadores para remover.")
-            return
+---
 
-        print("Jogadores do time:")
-        for jogador in time.jogadores:
-            print(f"- {jogador.nome}")
+## 🛠️ Estruturas de Dados Usadas
 
-        nome_jogador = input("Nome do jogador que deseja remover: ").strip()
-        jogador_removido = time.remover_jogador_por_nome(nome_jogador)
-        if jogador_removido:
-            print(f"Jogador {jogador_removido.nome} removido do time {nome_time}.")
-        else:
-            print("Jogador não encontrado no time.")
+- **Tupla** (`Jogador.info`) — usada para garantir imutabilidade dos dados do jogador.
+- **Lista** (`Time.jogadores`) — usada para armazenar e manipular os jogadores em um time.
+- **Dicionário** (`Campeonato.times`, `SistemaCampeonato.jogadores_cadastrados`, `SistemaCampeonato.campeonatos`) — usado para acessos rápidos via chave.
+- **Deque** (`Campeonato.fila_confrontos`) — fila eficiente para os confrontos, respeitando ordem FIFO.
 
-    def menu(self):
-        while True:
-            print("\n=== Sistema de Gestão de Campeonato Esportivo ===")
-            print("1. Cadastrar jogador")
-            print("2. Criar campeonato")
-            print("3. Adicionar time ao campeonato")
-            print("4. Listar jogadores de um time")
-            print("5. Agendar confronto")
-            print("6. Realizar próximo confronto")
-            print("7. Listar campeonatos")
-            print("8. Remover jogador de um time")  
-            print("0. Sair")
-            escolha = input("Escolha uma opção: ").strip()
-            if escolha == "1":
-                self.cadastrar_jogador()
-            elif escolha == "2":
-                self.criar_campeonato()
-            elif escolha == "3":
-                self.adicionar_time_campeonato()
-            elif escolha == "4":
-                self.listar_jogadores_time()
-            elif escolha == "5":
-                self.agendar_confronto()
-            elif escolha == "6":
-                self.realizar_confronto()
-            elif escolha == "7":
-                self.listar_campeonatos()
-            elif escolha == "8":
-                self.remover_jogador_time()
-            elif escolha == "0":
-                print("Saindo do sistema...")
-                break
-            else:
-                print("Opção inválida, tente novamente.")
+---
 
+## 💡 Sugestões de Melhoria
 
-if __name__ == "__main__":
-    sistema = SistemaCampeonato()
-    sistema.menu()
+1. **Salvar/Carregar dados em arquivos** (JSON ou pickle) para manter os cadastros entre execuções.
+2. **Adicionar placar aos confrontos** e armazenamento de resultados.
+3. **Interface gráfica (GUI)** ou versão web.
+4. **Validação de dados mais robusta** (por exemplo, evitar idades negativas).
+5. **Separar entrada de dados da lógica de negócios** para facilitar testes automatizados.

@@ -1,0 +1,328 @@
+import collections
+
+class Jogador:
+    def __init__(self, nome, idade, posicao):
+        self.dados = (nome, idade, posicao)
+
+    @property
+    def nome(self):
+        return self.dados[0]
+
+    @property
+    def idade(self):
+        return self.dados[1]
+
+    @property
+    def posicao(self):
+        return self.dados[2]
+
+    def __str__(self):
+        return f"{self.nome}, {self.idade} anos, {self.posicao}"
+
+
+class Time:
+    def __init__(self, nome):
+        self.nome = nome
+        self.jogadores = []
+
+    def adicionar_jogador(self, jogador):
+        self.jogadores.append(jogador)
+
+    def remover_jogador_por_nome(self, nome_jogador):
+        for i, jogador in enumerate(self.jogadores):
+            if jogador.nome == nome_jogador:
+                return self.jogadores.pop(i)
+        return None
+
+    def listar_jogadores(self):
+        return [str(j) for j in self.jogadores]
+
+    def contar_jogadores(self):
+        return len(self.jogadores)
+
+
+class Campeonato:
+    def __init__(self, nome):
+        self.nome = nome
+        self.times = {}
+        self.confrontos = collections.deque()
+
+    def adicionar_time(self, time):
+        self.times[time.nome] = time
+
+    def agendar_confronto(self, time1, time2):
+        if time1 == time2:
+            print("Não é possível agendar confronto entre o mesmo time.")
+        elif time1 not in self.times or time2 not in self.times:
+            print("Um ou ambos os times não existem no campeonato.")
+        else:
+            self.confrontos.append((time1, time2))
+            print(f"Confronto agendado: {time1} vs {time2}")
+
+    def listar_confrontos_agendados(self):
+        if not self.confrontos:
+            print("Nenhum confronto agendado.")
+        else:
+            print("Confrontos agendados:")
+            for t1, t2 in self.confrontos:
+                print(f" - {t1} vs {t2}")
+
+    def realizar_proximo_confronto(self):
+        if self.confrontos:
+            t1, t2 = self.confrontos.popleft()
+            print(f"Realizando confronto: {t1} vs {t2}")
+            return (t1, t2)
+        else:
+            print("Nenhum confronto na fila.")
+            return None
+
+    def contar_jogadores_por_time(self):
+        if not self.times:
+            print("Nenhum time registrado.")
+        else:
+            print("Quantidade de jogadores por time:")
+            for nome, time in self.times.items():
+                print(f" - {nome}: {time.contar_jogadores()} jogador(es)")
+
+class SistemaCampeonato:
+    def __init__(self):
+        self.jogadores = {}
+        self.campeonatos = {}
+        self.acoes = []  
+  
+    def _registrar_acao(self, descricao):
+        self.acoes.append(descricao)
+
+   
+    def cadastrar_jogador(self):
+        nome = input("Nome do jogador: ").strip()
+        if not nome:
+            print("Nome não pode estar vazio.")
+            return
+        if nome in self.jogadores:
+            print("Jogador já existe.")
+            return
+        try:
+            idade = int(input("Idade: "))
+        except ValueError:
+            print("Idade inválida.")
+            return
+        posicao = input("Posição: ").strip()
+        if not posicao:
+            print("Posição não pode estar vazia.")
+            return
+        self.jogadores[nome] = Jogador(nome, idade, posicao)
+        print(f"Jogador {nome} cadastrado.")
+        self._registrar_acao(f"Cadastrou jogador '{nome}'")
+
+    def criar_campeonato(self):
+        nome = input("Nome do campeonato: ").strip()
+        if not nome:
+            print("Nome do campeonato não pode estar vazio.")
+            return
+        if nome in self.campeonatos:
+            print("Campeonato já existe.")
+            return
+        self.campeonatos[nome] = Campeonato(nome)
+        print(f"Campeonato '{nome}' criado.")
+        self._registrar_acao(f"Criou campeonato '{nome}'")
+
+    def adicionar_time(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if not camp_nome:
+            print("Nome do campeonato não pode estar vazio.")
+            return
+        if camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        time_nome = input("Nome do time: ").strip()
+        if not time_nome:
+            print("Nome do time não pode estar vazio.")
+            return
+        campeonato = self.campeonatos[camp_nome]
+        if time_nome in campeonato.times:
+            print("Time já existe nesse campeonato.")
+            return
+        time = Time(time_nome)
+        while True:
+            jogador_nome = input("Adicionar jogador (ou ENTER para sair): ").strip()
+            if jogador_nome == "":
+                break
+            if jogador_nome in self.jogadores:
+                time.adicionar_jogador(self.jogadores[jogador_nome])
+                print(f"Jogador {jogador_nome} adicionado ao time.")
+            else:
+                print("Jogador não cadastrado.")
+
+        if len(time.jogadores) == 0:
+            print("Não é permitido adicionar um time vazio ao campeonato.")
+            return
+
+        campeonato.adicionar_time(time)
+        print(f"Time '{time_nome}' adicionado ao campeonato '{camp_nome}'.")
+        self._registrar_acao(f"Adicionou time '{time_nome}' ao campeonato '{camp_nome}'")
+
+    def listar_jogadores_time(self):
+        camp_nome = input("Campeonato: ").strip()
+        if not camp_nome or camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        time_nome = input("Time: ").strip()
+        if not time_nome:
+            print("Nome do time não pode estar vazio.")
+            return
+        campeonato = self.campeonatos[camp_nome]
+        if time_nome not in campeonato.times:
+            print("Time não existe nesse campeonato.")
+            return
+        jogadores = campeonato.times[time_nome].listar_jogadores()
+        if jogadores:
+            print(f"Jogadores do time {time_nome}:")
+            for j in jogadores:
+                print(" -", j)
+        else:
+            print("Time sem jogadores.")
+
+    def remover_jogador_time(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if not camp_nome or camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        campeonato = self.campeonatos[camp_nome]
+        time_nome = input("Nome do time: ").strip()
+        if not time_nome or time_nome not in campeonato.times:
+            print("Time não encontrado.")
+            return
+        time = campeonato.times[time_nome]
+        nome_jogador = input("Nome do jogador a remover: ").strip()
+        if not nome_jogador:
+            print("Nome do jogador não pode estar vazio.")
+            return
+        removido = time.remover_jogador_por_nome(nome_jogador)
+        if removido:
+            print(f"Jogador {nome_jogador} removido do time {time_nome}.")
+            self._registrar_acao(f"Removeu jogador '{nome_jogador}' do time '{time_nome}'")
+        else:
+            print("Jogador não encontrado no time.")
+
+    def agendar_confronto(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if not camp_nome or camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        t1 = input("Time 1: ").strip()
+        t2 = input("Time 2: ").strip()
+        if not t1 or not t2:
+            print("Nome dos times não pode estar vazio.")
+            return
+        self.campeonatos[camp_nome].agendar_confronto(t1, t2)
+        self._registrar_acao(f"Agendou confronto '{t1} vs {t2}'")
+
+    def realizar_confronto(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if not camp_nome or camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        resultado = self.campeonatos[camp_nome].realizar_proximo_confronto()
+        if resultado:
+            t1, t2 = resultado
+            self._registrar_acao(f"Realizou confronto '{t1} vs {t2}'")
+
+    def listar_confrontos(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if not camp_nome or camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        self.campeonatos[camp_nome].listar_confrontos_agendados()
+
+    def contar_jogadores_times(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if not camp_nome or camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+        self.campeonatos[camp_nome].contar_jogadores_por_time()
+
+    def mostrar_posicoes_por_time(self):
+        camp_nome = input("Nome do campeonato: ").strip()
+        if camp_nome not in self.campeonatos:
+            print("Campeonato não encontrado.")
+            return
+
+        campeonato = self.campeonatos[camp_nome]
+        if not campeonato.times:
+            print("Nenhum time registrado.")
+            return
+
+        posicoes_por_time = {}
+        for nome, time in campeonato.times.items():
+            posicoes_por_time[nome] = [j.posicao for j in time.jogadores]
+
+        print("Posições dos jogadores por time:")
+        for time, posicoes in posicoes_por_time.items():
+            texto = ", ".join(posicoes) if posicoes else "Sem jogadores"
+            print(f" - {time}: {texto}")
+
+    def mostrar_ultima_acao(self):
+        if not self.acoes:
+            print("Nenhuma ação registrada ainda.")
+        else:
+            print("Última ação registrada:", self.acoes.pop())
+
+    def menu(self):
+        while True:
+            print("\n=== Sistema de Gestão de Campeonato Esportivo ===")
+            print("1. Cadastrar jogador")
+            print("2. Criar campeonato")
+            print("3. Adicionar time ao campeonato")
+            print("4. Listar jogadores de um time")
+            print("5. Agendar confronto")
+            print("6. Realizar próximo confronto")
+            print("7. Remover jogador de um time")
+            print("8. Listar campeonatos")
+            print("9. Listar confrontos agendados")
+            print("10. Contar jogadores por time")
+            print("11. Mostrar posições dos jogadores por time")
+            print("12. Ver última ação realizada")
+            print("0. Sair")
+            opcao = input("Escolha uma opção: ").strip()
+
+            if opcao == "1":
+                self.cadastrar_jogador()
+            elif opcao == "2":
+                self.criar_campeonato()
+            elif opcao == "3":
+                self.adicionar_time()
+            elif opcao == "4":
+                self.listar_jogadores_time()
+            elif opcao == "5":
+                self.agendar_confronto()
+            elif opcao == "6":
+                self.realizar_confronto()
+            elif opcao == "7":
+                self.remover_jogador_time()
+            elif opcao == "8":
+                if not self.campeonatos:
+                    print("Nenhum campeonato cadastrado.")
+                else:
+                    print("Campeonatos cadastrados:")
+                    for nome in self.campeonatos:
+                        print(" -", nome)
+            elif opcao == "9":
+                self.listar_confrontos()
+            elif opcao == "10":
+                self.contar_jogadores_times()
+            elif opcao == "11":
+                self.mostrar_posicoes_por_time()
+            elif opcao == "12":
+                self.mostrar_ultima_acao()
+            elif opcao == "0":
+                print("Encerrando o sistema.")
+                break
+            else:
+                print("Opção inválida.")
+
+
+if __name__ == "__main__":
+    sistema = SistemaCampeonato()
+    sistema.menu()
+
